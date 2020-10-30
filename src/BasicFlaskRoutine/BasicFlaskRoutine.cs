@@ -291,6 +291,8 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
                         mobCount++;
                     }
 
+                    LogErr($"HXHIEU: ${mobCount} {minimumMonsterCount}", 1);
+
                     if (mobCount >= minimumMonsterCount)
                     {
                         if (Settings.Debug)
