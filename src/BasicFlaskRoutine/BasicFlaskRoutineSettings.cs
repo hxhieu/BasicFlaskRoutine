@@ -6,6 +6,8 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 {
     public class BasicFlaskRoutineSettings : BaseTreeSettings
     {
+        public TextNode Version { get; } = "0.1.0";
+
         public BasicFlaskRoutineSettings()
         {
             TicksPerSecond = new RangeNode<int>(10, 1, 30);
@@ -78,7 +80,6 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
         public RangeNode<int> ManaPotion { get; set; }
         public RangeNode<int> InstantManaPotion { get; set; }
         public RangeNode<int> MinManaFlask { get; set; }
-
 
         public ToggleNode RemAilment { get; set; }
         public ToggleNode RemFrozen { get; set; }
