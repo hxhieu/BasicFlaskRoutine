@@ -431,7 +431,9 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 
             if (ImGui.TreeNodeEx("Plugin Options", collapsingHeaderFlags))
             {
-                Settings.EnableInHideout.Value = ImGuiExtension.Checkbox("Enable in Hideout", Settings.EnableInHideout);
+                ImGui.Text(Settings.Version.Value);
+                ImGui.Separator();
+                Settings.EnableInHideout.Value = ImGuiExtension.Checkbox("Enable in Hideout 111", Settings.EnableInHideout);
                 ImGui.Separator();
                 Settings.TicksPerSecond.Value = ImGuiExtension.IntSlider("Ticks Per Second", Settings.TicksPerSecond); ImGuiExtension.ToolTipWithText("(?)", "Determines how many times the plugin checks flasks every second.\nLower for less resources, raise for faster response (but higher chance to chug potions).");
                 ImGui.Separator();
