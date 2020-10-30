@@ -6,7 +6,7 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 {
     public class BasicFlaskRoutineSettings : BaseTreeSettings
     {
-        public TextNode Version { get; } = "0.1.0";
+        public TextNode Version { get; } = "hxhieu-0.1.0";
 
         public BasicFlaskRoutineSettings()
         {

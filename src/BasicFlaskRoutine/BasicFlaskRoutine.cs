@@ -185,7 +185,9 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 
         private Composite CreateDefensivePotionComposite()
         {
-            return new Decorator((x => Settings.DefensiveFlaskEnable && (PlayerHelper.isHealthBelowPercentage(Settings.HPPercentDefensive) || PlayerHelper.isEnergyShieldBelowPercentage(Settings.ESPercentDefensive) || Settings.DefensiveMonsterCount > 0 && HasEnoughNearbyMonsters(Settings.DefensiveMonsterCount, Settings.DefensiveMonsterDistance, Settings.DefensiveCountNormalMonsters, Settings.DefensiveCountRareMonsters, Settings.DefensiveCountMagicMonsters, Settings.DefensiveCountUniqueMonsters, Settings.DefensiveIgnoreFullHealthUniqueMonsters))),
+            var vitalCondition = PlayerHelper.isHealthBelowPercentage(Settings.HPPercentDefensive) || PlayerHelper.isEnergyShieldBelowPercentage(Settings.ESPercentDefensive);
+            var monsterCondition = HasEnoughNearbyMonsters(Settings.DefensiveMonsterCount, Settings.DefensiveMonsterDistance, Settings.DefensiveCountNormalMonsters, Settings.DefensiveCountRareMonsters, Settings.DefensiveCountMagicMonsters, Settings.DefensiveCountUniqueMonsters, Settings.DefensiveIgnoreFullHealthUniqueMonsters);
+            return new Decorator((x => Settings.DefensiveFlaskEnable && vitalCondition && monsterCondition),
                 new PrioritySelector(
                     CreateUseFlaskAction(FlaskActions.Defense),
                     new Decorator((x => Settings.OffensiveAsDefensiveEnable), CreateUseFlaskAction(new List<FlaskActions> { FlaskActions.OFFENSE_AND_SPEEDRUN, FlaskActions.Defense }, ignoreFlasksWithAction: (() => Settings.DisableLifeSecUse ? new List<FlaskActions>() { FlaskActions.Life, FlaskActions.Mana, FlaskActions.Hybrid } : null)))
@@ -195,9 +197,11 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 
         private Composite CreateOffensivePotionComposite()
         {
+            var vitalCondition = PlayerHelper.isHealthBelowPercentage(Settings.HPPercentDefensive) || PlayerHelper.isEnergyShieldBelowPercentage(Settings.ESPercentDefensive);
+            var monsterCondition = HasEnoughNearbyMonsters(Settings.OffensiveMonsterCount, Settings.OffensiveMonsterDistance, Settings.OffensiveCountNormalMonsters, Settings.OffensiveCountRareMonsters, Settings.OffensiveCountMagicMonsters, Settings.OffensiveCountUniqueMonsters, Settings.OffensiveIgnoreFullHealthUniqueMonsters);
             return new PrioritySelector(
-                new Decorator((x => Settings.OffensiveFlaskEnable && (PlayerHelper.isHealthBelowPercentage(Settings.HPPercentOffensive) || PlayerHelper.isEnergyShieldBelowPercentage(Settings.ESPercentOffensive) || Settings.OffensiveMonsterCount > 0 && HasEnoughNearbyMonsters(Settings.OffensiveMonsterCount, Settings.OffensiveMonsterDistance, Settings.OffensiveCountNormalMonsters, Settings.OffensiveCountRareMonsters, Settings.OffensiveCountMagicMonsters, Settings.OffensiveCountUniqueMonsters, Settings.OffensiveIgnoreFullHealthUniqueMonsters))),
-                    CreateUseFlaskAction(new List<FlaskActions> { FlaskActions.Offense, FlaskActions.OFFENSE_AND_SPEEDRUN }, ignoreFlasksWithAction: (() => Settings.DisableLifeSecUse ?  new List<FlaskActions>() { FlaskActions.Life, FlaskActions.Mana, FlaskActions.Hybrid} : null)))
+                new Decorator((x => Settings.OffensiveFlaskEnable && vitalCondition && monsterCondition),
+                    CreateUseFlaskAction(new List<FlaskActions> { FlaskActions.Offense, FlaskActions.OFFENSE_AND_SPEEDRUN }, ignoreFlasksWithAction: (() => Settings.DisableLifeSecUse ? new List<FlaskActions>() { FlaskActions.Life, FlaskActions.Mana, FlaskActions.Hybrid } : null)))
             );
         }
 
@@ -205,7 +209,7 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
         {
             return new Decorator(x => Settings.RemAilment,
                 new PrioritySelector(
-                    new Decorator(x => Settings.RemBleed, CreateCurableDebuffDecorator(Cache.DebuffPanelConfig.Bleeding, CreateUseFlaskAction(FlaskActions.BleedImmune, isCleansing:true))),
+                    new Decorator(x => Settings.RemBleed, CreateCurableDebuffDecorator(Cache.DebuffPanelConfig.Bleeding, CreateUseFlaskAction(FlaskActions.BleedImmune, isCleansing: true))),
                     new Decorator(x => Settings.RemBurning, CreateCurableDebuffDecorator(Cache.DebuffPanelConfig.Burning, CreateUseFlaskAction(FlaskActions.IgniteImmune, isCleansing: true))),
                     CreateCurableDebuffDecorator(Cache.DebuffPanelConfig.Corruption, CreateUseFlaskAction(FlaskActions.BleedImmune, isCleansing: true), (() => Settings.CorruptCount)),
                     new Decorator(x => Settings.RemFrozen, CreateCurableDebuffDecorator(Cache.DebuffPanelConfig.Frozen, CreateUseFlaskAction(FlaskActions.FreezeImmune, isCleansing: true))),
@@ -296,7 +300,8 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
                         return true;
                     }
                 }
-            } else if (Settings.Debug)
+            }
+            else if (Settings.Debug)
             {
                 Log("NearbyMonstersCondition returning false because mob list was invalid.", 2);
             }
@@ -371,7 +376,7 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 
         private bool FlaskMatchesInstant(PlayerFlask playerFlask, Boolean? instant)
         {
-            return instant == null 
+            return instant == null
                     || instant == false && CanUseFlaskAsRegen(playerFlask)
                     || instant == true && CanUseFlaskAsInstant(playerFlask);
         }
@@ -429,11 +434,12 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 
             ImGuiTreeNodeFlags collapsingHeaderFlags = ImGuiTreeNodeFlags.CollapsingHeader;
 
+            ImGui.Text($"Version: {Settings.Version.Value}");
+            ImGui.Separator();
+
             if (ImGui.TreeNodeEx("Plugin Options", collapsingHeaderFlags))
             {
-                ImGui.Text(Settings.Version.Value);
-                ImGui.Separator();
-                Settings.EnableInHideout.Value = ImGuiExtension.Checkbox("Enable in Hideout 111", Settings.EnableInHideout);
+                Settings.EnableInHideout.Value = ImGuiExtension.Checkbox("Enable in Hideout", Settings.EnableInHideout);
                 ImGui.Separator();
                 Settings.TicksPerSecond.Value = ImGuiExtension.IntSlider("Ticks Per Second", Settings.TicksPerSecond); ImGuiExtension.ToolTipWithText("(?)", "Determines how many times the plugin checks flasks every second.\nLower for less resources, raise for faster response (but higher chance to chug potions).");
                 ImGui.Separator();
