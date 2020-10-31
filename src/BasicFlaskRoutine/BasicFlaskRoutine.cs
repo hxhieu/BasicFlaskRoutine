@@ -247,6 +247,7 @@ namespace TreeRoutine.Routine.BasicFlaskRoutine
 
         private Boolean HasEnoughNearbyMonsters(int minimumMonsterCount, int maxDistance, bool countNormal, bool countRare, bool countMagic, bool countUnique, bool ignoreUniqueIfFullHealth)
         {
+            LogErr($"HXHIEU: HasEnoughNearbyMonsters", 2);
             var mobCount = 0;
             var maxDistanceSquare = maxDistance * maxDistance;
 
